@@ -120,7 +120,7 @@ enum Mode {
 struct EditorState {
 	int   W = 900, H = 650;
 	float scale = 40.f;
-	Mode modo = MODE_POLYGON;    // ? empezamos en POLYGON para que sea útil directo
+	Mode modo = MODE_CIRCLE;
 	
 	std::vector<Shape> escena;
 	std::vector<Vec2>  tmpVerts;

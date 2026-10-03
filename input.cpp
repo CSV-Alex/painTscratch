@@ -6,20 +6,19 @@
 #endif
 #include <cmath>
 #include <algorithm>
-#include <cstdlib>          // ? NUEVO: exit()
+#include <cstdlib> 
 #include "input.h"
 #include "editor.h"
 
-// -- Paleta de colores ciclica (contorno) -------------------------------------
 static const float kContornos[][3] = {
-	{0.1f, 0.4f, 0.9f},   // azul
-{0.9f, 0.2f, 0.1f},   // rojo
-	{0.1f, 0.7f, 0.2f},   // verde
-{0.9f, 0.55f, 0.0f},  // naranja
-	{0.6f, 0.1f, 0.8f},   // violeta
-{0.0f, 0.6f, 0.7f},   // cian
+	{0.1f, 0.4f, 0.9f}, // azul
+{0.9f, 0.2f, 0.1f}, // rojo
+	{0.1f, 0.7f, 0.2f}, // verde
+{0.9f, 0.55f, 0.0f}, // naranja
+	{0.6f, 0.1f, 0.8f}, // violeta
+{0.0f, 0.6f, 0.7f}, // cian
 	{0.85f, 0.85f, 0.1f}, // amarillo
-{0.1f, 0.1f, 0.1f},   // negro
+{0.1f, 0.1f, 0.1f}, // negro
 };
 static const int kNColores = 8;
 
@@ -30,7 +29,6 @@ static void aplicarColorContorno(int idx) {
 	ed.colorB = kContornos[ed.colorIdx][2];
 }
 
-// -- Cierra el polígono en construcción (útil para clic derecho) --------------
 static void cerrarPoligono() {
 	if (ed.modo == MODE_POLYGON && ed.tmpVerts.size() >= 3) {
 		Shape s(SHAPE_POLYGON, ed.colorR, ed.colorG, ed.colorB);
@@ -38,7 +36,7 @@ static void cerrarPoligono() {
 		s.verts = ed.tmpVerts;
 		ed.escena.push_back(s);
 		ed.tmpVerts.clear();
-		// Seleccionar el recién creado automáticamente
+		
 		for (auto& sh : ed.escena) sh.selected = false;
 		ed.escena.back().selected = true;
 		ed.selectedIdx = (int)ed.escena.size() - 1;
@@ -50,7 +48,7 @@ static void cerrarPoligono() {
 	}
 }
 
-// -- Selección por distancia mínima -------------------------------------------
+// Selección por distancia mínima
 static void seleccionar(Vec2 p) {
 	const float UMBRAL = 0.6f;
 	int mejorIdx = -1;
@@ -64,7 +62,7 @@ static void seleccionar(Vec2 p) {
 	if (mejorIdx >= 0) ed.escena[mejorIdx].selected = true;
 }
 
-// -- Selecciona el N-ésimo polígono cerrado (1-based) -------------------------
+// Selecciona el N-ésimo polígono cerrado (1-based)
 static void seleccionarPoligonoN(int n) {
 	int count = 0;
 	int found = -1;
@@ -82,7 +80,6 @@ static void seleccionarPoligonoN(int n) {
 	}
 }
 
-// -- Aplica color a un canal r/g/b al polígono activo -------------------------
 static void setFillColorR() {
 	ed.fillR = 1.f; ed.fillG = 0.f; ed.fillB = 0.f;
 	if (ed.selectedIdx >= 0) {
@@ -105,12 +102,10 @@ static void setFillColorB() {
 	}
 }
 
-// -- Clic del mouse (izquierdo crea, derecho cierra) --------------------------
 void mouse(int button, int state, int x, int y) {
 	if (state != GLUT_DOWN) return;
 	Vec2 p = screenToWorld(x, y);
 	
-	// CLIC DERECHO: cierra el polígono en construcción
 	if (button == GLUT_RIGHT_BUTTON) {
 		cerrarPoligono();
 		glutPostRedisplay();
@@ -165,35 +160,29 @@ void passiveMotion(int x, int y) {
 	glutPostRedisplay();
 }
 
-// -- Teclado ------------------------------------------------------------------
 void keyboard(unsigned char key, int x, int y) {
 	Shape* sel = (ed.selectedIdx >= 0) ? &ed.escena[ed.selectedIdx] : nullptr;
 	
 	switch (key) {
-		
-		// -- Seleccionar polígono por índice: 1..9 ----------------------------
+	
 	case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
 		seleccionarPoligonoN(key - '0');
 		break;
 		
-		// -- Modo SELECT ------------------------------------------------------
 	case '0':
 		ed.modo = MODE_SELECT; ed.tmpVerts.clear();
 		break;
 		
-		// -- Enter: cierra igual que clic derecho -----------------------------
 	case 13:
 		cerrarPoligono();
 		break;
 		
-		// -- ESC: cancelar o salir --------------------------------------------
 	case 27:
 		if (!ed.tmpVerts.empty()) ed.tmpVerts.clear();
 		else exit(0);
 		break;
 		
-		// -- Rotación: D = derecha, I = izquierda -----------------------------
 	case 'D': case ']': {
 		if (!sel) break;
 		Vec2 c = centroide(sel->verts);
@@ -207,26 +196,27 @@ void keyboard(unsigned char key, int x, int y) {
 		break;
 	}
 	
-	// -- Escala: S = +10%, s = -10% ---------------------------------------
 	case 'S': {
 		if (!sel) break;
 		Vec2 c = centroide(sel->verts);
 		applyTransform(*sel, matScaleAround(c, 1.1f, 1.1f));
 		break;
 	}
+	
 	case 's': {
 		if (!sel) break;
 		Vec2 c = centroide(sel->verts);
 		applyTransform(*sel, matScaleAround(c, 0.9f, 0.9f));
 		break;
 	}
-	// Alias con q/z
+
 	case 'q': {
 		if (!sel) break;
 		Vec2 c = centroide(sel->verts);
 		applyTransform(*sel, matScaleAround(c, 1.1f, 1.1f));
 		break;
 	}
+	
 	case 'z': {
 		if (!sel) break;
 		Vec2 c = centroide(sel->verts);
@@ -234,18 +224,15 @@ void keyboard(unsigned char key, int x, int y) {
 		break;
 	}
 	
-	// -- Color de relleno directo: r, g, b --------------------------------
 	case 'r': setFillColorR(); break;
 	case 'g': setFillColorG(); break;
 	case 'b': setFillColorB(); break;
 	
-	// -- Color de contorno ciclico (c) ------------------------------------
 	case 'c':
 		aplicarColorContorno(ed.colorIdx + 1);
 		if (sel) { sel->r = ed.colorR; sel->g = ed.colorG; sel->b = ed.colorB; }
 		break;
 		
-		// -- Toggle relleno y forzar relleno ----------------------------------
 	case 'f':
 		if (sel && (sel->type == SHAPE_POLYGON || sel->type == SHAPE_CIRCLE))
 			sel->filled = !sel->filled;
@@ -255,14 +242,12 @@ void keyboard(unsigned char key, int x, int y) {
 			sel->filled = true;
 		break;
 		
-		// -- Limpiar escena ---------------------------------------------------
 	case 'C':
 		ed.escena.clear();
 		ed.tmpVerts.clear();
 		ed.selectedIdx = -1;
 		break;
 		
-		// -- Borrar seleccionado ----------------------------------------------
 	case 127: case 8:
 		if (sel) {
 			ed.escena.erase(ed.escena.begin() + ed.selectedIdx);
@@ -273,10 +258,8 @@ void keyboard(unsigned char key, int x, int y) {
 	glutPostRedisplay();
 }
 
-// -- Teclas especiales: flechas (traslación) y F1-F6 (herramientas) -----------
 void specialKey(int key, int x, int y) {
 	
-	// F1..F6: cambio de herramienta (reemplaza a las viejas 1-5)
 	switch (key) {
 	case GLUT_KEY_F1: ed.modo = MODE_POINT;    ed.tmpVerts.clear(); glutPostRedisplay(); return;
 	case GLUT_KEY_F2: ed.modo = MODE_LINE;     ed.tmpVerts.clear(); glutPostRedisplay(); return;
@@ -286,7 +269,6 @@ void specialKey(int key, int x, int y) {
 	case GLUT_KEY_F6: ed.modo = MODE_SELECT;   ed.tmpVerts.clear(); glutPostRedisplay(); return;
 	}
 	
-	// Flechas: traslación
 	if (ed.selectedIdx < 0) { glutPostRedisplay(); return; }
 	const float PASO = 0.5f;
 	Shape& s = ed.escena[ed.selectedIdx];
@@ -302,7 +284,6 @@ void specialKey(int key, int x, int y) {
 	glutPostRedisplay();
 }
 
-// -- Reshape ------------------------------------------------------------------
 void reshape(int w, int h) {
 	if (h == 0) h = 1;
 	ed.W = w; ed.H = h;

@@ -19,9 +19,9 @@ Vec2 screenToWorld(int mx, int my) {
 
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);   // ? sin GLUT_STENCIL
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
 	glutInitWindowSize(ed.W, ed.H);
-	glutCreateWindow("Practica Integradora | Bresenham + ET/EAT | 1,2:Poligono F1-F5:Herramienta D,I:Rotar S,s:Escalar r,g,b:Relleno P:Rellenar C:Limpiar");
+	glutCreateWindow("Proyecto painT");
 	
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
